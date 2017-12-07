@@ -30,6 +30,7 @@ object RandomForest {
 
     //load train df
     val df = sparkSession.read.option("header", "true").option("inferSchema", "true").csv("src/main/resources/titanic/train.csv")
+    df.printSchema()
 
     //handle missing values
     val meanValue = df.agg(mean(df("Age"))).first.getDouble(0)
@@ -61,8 +62,8 @@ object RandomForest {
     //cross validation
     val paramMap = new ParamGridBuilder()
       .addGrid(randomForestClassifier.impurity, Array("gini", "entropy"))
-      .addGrid(randomForestClassifier.maxDepth, Array(5, 10, 15))
-      .addGrid(randomForestClassifier.minInstancesPerNode, Array(1, 2, 4))
+      .addGrid(randomForestClassifier.maxDepth, Array(1,2,5, 10, 15))
+      .addGrid(randomForestClassifier.minInstancesPerNode, Array(1, 2, 4,5,10))
       .build()
 
     val cvModel = crossValidation(pipeline, paramMap, trainDf)
