@@ -101,7 +101,7 @@ object RandomForest {
     Array(stringIndexer, oneHot)
   }
   def accuracyScore(df: DataFrame, label: String, predictCol: String) = {
-    val rdd = df.select(label, predictCol).rdd.map(row ⇒ (row.getInt(0).toDouble, row.getDouble(1)))
+    val rdd = df.select(predictCol,label).rdd.map(row ⇒ (row.getDouble(0), row.getInt(1).toDouble))
     new MulticlassMetrics(rdd).accuracy
   }
 }
