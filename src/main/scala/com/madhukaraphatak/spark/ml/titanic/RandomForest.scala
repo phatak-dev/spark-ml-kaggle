@@ -12,6 +12,7 @@ import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
+import com.madhukaraphatak.spark.ml.MLUtils.accuracyScore
 
 /**
  * Random Forest for predicting survival in the titanic ship
@@ -100,8 +101,5 @@ object RandomForest {
     val oneHot = new OneHotEncoder().setInputCol(s"${column}_index").setOutputCol(s"${column}_onehot")
     Array(stringIndexer, oneHot)
   }
-  def accuracyScore(df: DataFrame, label: String, predictCol: String) = {
-    val rdd = df.select(predictCol,label).rdd.map(row ⇒ (row.getDouble(0), row.getInt(1).toDouble))
-    new MulticlassMetrics(rdd).accuracy
-  }
+
 }
