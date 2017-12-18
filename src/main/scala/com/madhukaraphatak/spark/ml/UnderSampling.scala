@@ -30,6 +30,7 @@ object UnderSampling {
 
     sparkSession.sparkContext.setLogLevel("ERROR")
     //load train df
+    // Download the data from : https://www.kaggle.com/dalpozz/creditcardfraud/downloads/creditcard.csv
     val df = sparkSession.read.option("header", "true").option("inferSchema", "true").csv("src/main/resources/creditcard.csv")
     df.printSchema()
 
