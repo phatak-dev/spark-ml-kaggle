@@ -41,18 +41,40 @@ object UnderSampling {
     val vectorAssembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
 
     // pipeline 
-    val logisticRegression = new LogisticRegression()
+    val logisticRegression = new LogisticRegression().setLabelCol("Class")
     val trainPipeline = new Pipeline().setStages(Array(amountVectorAssembler,standarScaler,vectorAssembler,logisticRegression))
 
-    val dfs = df.randomSplit(Array(0.7, 0.3))
-    val trainDf = dfs(0).withColumnRenamed("Class", "label")
-    val crossDf = dfs(1)
+    println("for imbalanced data")
+    runPipeline(trainPipeline, df)
 
-    val imbalanceModel = trainPipeline.fit(trainDf)
-    println("test accuracy with pipeline" + accuracyScore(imbalanceModel.transform(crossDf), "Class", "prediction"))
-    println("test recall for 1.0 is " + recall(imbalanceModel.transform(crossDf), "Class", "prediction", 1.0))
+    val underSampledDf = underSampleDf(df)
+    println("for balanced data")
+    val balancedModel = runPipeline(trainPipeline, underSampledDf)
+      
+    println("balanced model for full data")
+    printScores(balancedModel, df)
 
+   }
 
+  def underSampleDf(df:DataFrame) = {
+    val fraudDf = df.filter("Class=1.0")
+    val nonFraudDf = df.filter("Class=0.0")
+    //random sample the nonFraud to match the value of fraud
+    val sampleRatio = fraudDf.count().toDouble / df.count().toDouble
+    val nonFraudSampleDf = nonFraudDf.sample(false, sampleRatio)
+    fraudDf.unionAll(nonFraudSampleDf)
+  }
+
+  def runPipeline(pipeline:Pipeline, df:DataFrame):PipelineModel = {
+    val (trainDf,crossDf) = trainTestSplit(df)
+    val model = pipeline.fit(trainDf)
+    printScores(model, crossDf)
+    model
+  }
+
+  def printScores(model:PipelineModel, df:DataFrame) = {
+    println("test accuracy with pipeline " + accuracyScore(model.transform(df), "Class", "prediction"))
+    println("test recall for 1.0 is " + recall(model.transform(df), "Class", "prediction", 1.0))
   }
 }
  

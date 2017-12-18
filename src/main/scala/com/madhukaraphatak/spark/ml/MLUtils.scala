@@ -14,5 +14,12 @@ object MLUtils {
     new MulticlassMetrics(rdd).recall(labelValue)
   }
 
+  def trainTestSplit(df:DataFrame, testSize:Double = 0.3):(DataFrame,DataFrame) = {
+    val dfs = df.randomSplit(Array(1-testSize, testSize))
+    val trainDf = dfs(0)
+    val crossDf = dfs(1)
+    (trainDf,crossDf)
+  }
+
 }
 
